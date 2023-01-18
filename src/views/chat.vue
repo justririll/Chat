@@ -61,7 +61,7 @@
         // creating websocket
         this.client = new WebSocket("ws://irc-ws.chat.twitch.tv:80");
 
-        this.client.onmessage = (e) => {
+        this.client.onmessage = async (e) => {
             let payload = chat.parseMessage(e)
 
             switch (payload.command) {
@@ -71,6 +71,13 @@
                 case "PRIVMSG":
                     if (this.channelID == null) {
                         this.channelID = payload.tags["room-id"]
+                        try {
+                          let subs = await apis.getSubscriberBadges(this.channelID)
+                          this.GlobalBadges["subscriber"] = subs
+                        } catch (e) {
+                          console.log(`Unable to set subs badges: ${e}`)
+                        }
+                        
                     }
                     console.log(this.getMessageFromPayload(payload))
                     this.Messages.push(this.getMessageFromPayload(payload))
