@@ -30,13 +30,13 @@
         useEventAPI: this.$route.query.eventapi != "0",
 
         // other:
+        channel: this.$route.query.channel,
         currBG: true,
         IsDisconnected: false,
         Emotes: [],
         GlobalBadges: [],
         OtherBadges: [],
         Paints: [],
-        channel: this.$route.query.channel,
         channelID: null,
         client: null,
         Messages: [],
@@ -88,6 +88,7 @@
           }
         }
         this.client.OnPrivateMessage = async (payload) => {
+          console.log(payload)
           payload.BG = "#2b2b2b"
           if (this.altBG) {
             payload.BG = this.currBG ? "#2b2b2b" : "#242424"

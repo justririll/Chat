@@ -262,6 +262,11 @@ var chat = {
                 parsedMessage.command = parseParameters(rawParametersComponent, parsedMessage.command);
             }
         }
+
+        if (parsedMessage.parameters) {
+            parsedMessage.parameters = parsedMessage.parameters.replace("ACTION", "")
+            parsedMessage.parameters = parsedMessage.parameters.replace("", "")
+        }
     
         return parsedMessage;
     },

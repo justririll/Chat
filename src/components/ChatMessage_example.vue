@@ -34,12 +34,13 @@ export default {
       color : "",
 
       Badges: [],
-       paintsEnabled: this.$route.query.paints || "1",
-      font_size: this.$route.query.font_size || "18",
-      interpolateSize: this.$route.query.interpbs != "0",
     }
   },
   props: {
+    paintsEnabled: String,
+    font_size: String,
+    interpolateSize: String,
+    
     Emotes: Array,
     OtherBadges: Array,
     GlobalBadges: Object,
