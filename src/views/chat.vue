@@ -1,13 +1,16 @@
 <template>
     <div id="chat">
-      <ChatMessage v-for="mes in Messages" :key="mes" :Emotes="Emotes" :Message="mes.Message" :User='mes.User' :Badges='mes.Badges'/>
+      <ChatMessage v-for="mes in Messages" :key="mes" :Emotes="Emotes" :GlobalBadges="GlobalBadges" :Paints="Paints" :OtherBadges="OtherBadges" :defaultColors="defaultColors" :payload="mes" :BG="mes.BG"/>
     </div>
 </template>
   
 <script>
+  // Осталось добавить реконект, значки ффз (и чаттерино?)
+
   import ChatMessage from '@/components/ChatMessage.vue'
-  import chat from '@/methods/chat.js'
   import apis from '@/methods/tpd.js'
+  import EventApi from '@/methods/eventapi.js'
+  import Twitch from '@/methods/twitch.js'
   
   export default {
     name: 'chat-page',
@@ -16,9 +19,23 @@
   },
     data() {
       return {
-        Emotes: [{"Name": "123", "Url": "https://cdn.7tv.app/emote/62b371656477bc14fa60caa9/1x.webp"},
-                {"Name": "modcheck", "Url": "https://cdn.7tv.app/emote/62e833bde328a524eef784d7/1x.webp"}],
+        EventApi: null,
+
+        // settings:
+        // value: selectedValue || defaultValue
+        paintsEnabled: this.$route.query.paints || "1",
+        font_size: this.$route.query.font_size || "18",
+        // value: selectedValue != off (true by default)
+        altBG: this.$route.query.altbg != "0",
+        useEventAPI: this.$route.query.eventapi != "0",
+
+        // other:
+        currBG: true,
+        IsDisconnected: false,
+        Emotes: [],
         GlobalBadges: [],
+        OtherBadges: [],
+        Paints: [],
         channel: this.$route.query.channel,
         channelID: null,
         client: null,
@@ -33,67 +50,74 @@
       }
     },
     methods: {
-      createLogMessage(message) {
-        return {"User": {"Login": "chat", "DisplayName": "Chat", "Color": "rgb(255, 255, 255)"},
-         "Message": message, "Badges": []}
+      onEmoteDelete(e) {
+        this.Emotes = this.Emotes.filter(item => item.ID !== e.old_value.id)
       },
-      getMessageFromPayload(payload) {
-        if (payload.command != "PRIVMSG") {
-            return {}
+      onEmoteAdd(e) {
+        this.Emotes.push({"Name": e.value.name, "ID": e.value.id, "Type": "7TV"})
+      },
+      onEmoteRename(e) {
+        for (let emote of this.Emotes) {
+          if (emote.ID == e.value.id) {
+            emote.Name = e.value.name
+          }
         }
-        if (payload.tags["display-name"] == undefined) {
-            payload.tags["display-name"] = payload.user
-        }
-        if (payload.tags.color == "") {
-            payload.tags.color = this.defaultColors[Math.floor(Math.random() * this.defaultColors.length)]
-        }
-        let Badges = []
-        let pos = 1
-        for (const [key, value] of Object.entries(payload.tags["badges"])) {
-            Badges.push({"Url": this.GlobalBadges[key][value], "Position": pos})
-        }
-
-        return {"User": {"Login": payload.user, "DisplayName": payload.tags["display-name"], "Color": payload.tags.color},
-                "Message": payload.message, "Badges": Badges}
+        this.Emotes.push({"Name": e.value.name, "ID": e.value.id, "Type": "7TV"})
       }
     },
     created: async function() {
         // creating websocket
-        this.client = new WebSocket("ws://irc-ws.chat.twitch.tv:80");
+        this.client = new Twitch(this.channel);
 
-        this.client.onmessage = async (e) => {
-            let payload = chat.parseMessage(e)
+        this.client.OnUserId = async (id) => {
+          this.channelID = id
+          try {
+            let subs = await apis.getSubscriberBadges(this.channelID)
+            this.GlobalBadges["subscriber"] = subs
+          } catch (e) {
+            console.log(`Unable to set subs badges: ${e}`)
+          }
+          let stv = await apis.get7tvEmotes(this.channelID)
+          this.Emotes = this.Emotes.concat(stv[0])
+          this.Emotes = this.Emotes.concat(await apis.getBttvEmotes(this.channelID))
 
-            switch (payload.command) {
-                // announce - USERNOTICE
-                // добавить удаление сообщений - CLEARCHAT & CLEARMSG
-                // 
-                case "PRIVMSG":
-                    if (this.channelID == null) {
-                        this.channelID = payload.tags["room-id"]
-                        try {
-                          let subs = await apis.getSubscriberBadges(this.channelID)
-                          this.GlobalBadges["subscriber"] = subs
-                        } catch (e) {
-                          console.log(`Unable to set subs badges: ${e}`)
-                        }
-                        
-                    }
-                    console.log(this.getMessageFromPayload(payload))
-                    this.Messages.push(this.getMessageFromPayload(payload))
-                    break;
-                case "PING":
-                    this.client.send(`PONG ${payload.message}`)
-            }
+          // initializing event api
+          if (this.useEventAPI) {
+            this.EventApi = new EventApi(stv[1], this.channelID, this.onEmoteDelete, this.onEmoteAdd, this.onEmoteRename)
+            this.EventApi.Connect()
+          }
         }
-        this.client.onopen = () => {
-            this.Messages.push(this.createLogMessage("Connected."))
-            this.client.send("NICK justinfan1337")
-            this.client.send("JOIN #" + this.channel);
-            this.client.send('CAP REQ :twitch.tv/tags twitch.tv/commands')
+        this.client.OnPrivateMessage = async (payload) => {
+          payload.BG = "#2b2b2b"
+          if (this.altBG) {
+            payload.BG = this.currBG ? "#2b2b2b" : "#242424"
+            this.currBG = !this.currBG
+          }
+          this.Messages.push(payload)
         }
+        this.client.OnClearChat = async (payload) => {
+          this.Messages = this.Messages.filter(item => item.source.nick !== payload.parameters)
+        }
+        this.client.OnClearMessage = async (payload) => {
+          this.Messages = this.Messages.filter(item => item.tags["id"] !== payload.tags["target-msg-id"])
+        }
+
+        this.client.connect()
         // getting data
+
+        let s = await apis.get7tvGlobalEmotes()
+        if (s != undefined) {
+         this.Emotes = this.Emotes.concat(s)
+        }
+        this.Emotes = this.Emotes.concat(await apis.get7tvGlobalEmotes())
+        this.Emotes = this.Emotes.concat(await apis.getBttvGlobalEmotes())
+        this.Emotes = this.Emotes.concat(await apis.getFfzEmotes(this.channel))
+        this.Emotes = this.Emotes.concat(await apis.getFfzGlobalEmotes())
+
         this.GlobalBadges = await apis.getGlobalBadges()
+        let bp = await apis.get7tvBadgesPaints()
+        this.OtherBadges = bp[0]
+        this.Paints = bp[1]
     }
   }
 </script>
@@ -107,7 +131,7 @@
     position: absolute;
     width: 100%;
     padding: 0;
-  
+
     overflow: hidden;
 
   }

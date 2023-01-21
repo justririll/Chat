@@ -10,6 +10,7 @@
   "dependencies": {
     "axios": "^1.2.3",
     "core-js": "^3.8.3",
+    "twemoji": "^14.0.2",
     "vue": "^3.2.13",
     "vue-router": "^4.1.6",
     "vue-sticky-scroll": "^0.1.0"
