@@ -5,7 +5,7 @@
 </template>
   
 <script>
-  // Осталось добавить реконект, значки ффз (и чаттерино?)
+  // значки ффз (и чаттерино?)
 
   import ChatMessage from '@/components/ChatMessage.vue'
   import apis from '@/methods/tpd.js'
