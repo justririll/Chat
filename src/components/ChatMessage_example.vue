@@ -90,7 +90,7 @@ export default {
         }
       }
 
-      // return {"User": {"Login": this.payload.user, "DisplayName": displayName, "Color": color},
+      // return {"User": {"Login": this.payyload.user, "DisplayName": displayName, "Color": color},
       //         "Message": this.payload.message, "Badges": Badges}
   },
   computed: {
