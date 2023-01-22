@@ -71,12 +71,11 @@
 
         this.client.OnUserId = async (id) => {
           this.channelID = id
-          try {
-            let subs = await apis.getSubscriberBadges(this.channelID)
+          let subs = await apis.getSubscriberBadges(this.channelID)
+          if (subs) {
             this.GlobalBadges["subscriber"] = subs
-          } catch (e) {
-            console.log(`Unable to set subs badges: ${e}`)
           }
+          // console.log(subs)
           let stv = await apis.get7tvEmotes(this.channelID)
           this.Emotes = this.Emotes.concat(stv[0])
           this.Emotes = this.Emotes.concat(await apis.getBttvEmotes(this.channelID))

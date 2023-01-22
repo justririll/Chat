@@ -1,5 +1,6 @@
 <template>
 <div id="main">
+    @todo
     <div class="example-chat">
       <div id="chat">
         <ChatMessage v-for="mes in Messages" :key="mes"
