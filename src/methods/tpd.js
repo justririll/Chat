@@ -1,4 +1,7 @@
 // import common from '@/methods/common.js'
+
+// @todo: сделать таймаут на получение всякой хуеты если произошла ошибка кроме 404
+
 var Huita = {
     async getGlobalBadges() {
         try {
@@ -17,7 +20,7 @@ var Huita = {
             return badges
         } catch (error) {
             console.log(`Unable to get global badges: ${error}`)
-            return []
+            return {}
         }
     },
     async getSubscriberBadges(user_id) {
@@ -26,12 +29,14 @@ var Huita = {
 
             const response = await fetch(`https://badges.twitch.tv/v1/badges/channels/${user_id}/display`)
             const json = await response.json()
-            let vers = json["badge_sets"]["subscriber"]["versions"]
-            let finalVersions = {}
-            for (const [key, value] of Object.entries(vers)) {
-                finalVersions[key] = value["image_url_2x"]
+            if (json.badge_sets.length > 0) {
+                let vers = json["badge_sets"]["subscriber"]["versions"]
+                let finalVersions = {}
+                for (const [key, value] of Object.entries(vers)) {
+                    finalVersions[key] = value["image_url_2x"]
+                }
+                subscriber = finalVersions
             }
-            subscriber = finalVersions
             return subscriber
     },
     async get7tvBadgesPaints() {

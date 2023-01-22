@@ -75,7 +75,6 @@
           if (subs) {
             this.GlobalBadges["subscriber"] = subs
           }
-          // console.log(subs)
           let stv = await apis.get7tvEmotes(this.channelID)
           this.Emotes = this.Emotes.concat(stv[0])
           this.Emotes = this.Emotes.concat(await apis.getBttvEmotes(this.channelID))
@@ -104,14 +103,14 @@
         this.client.connect()
         // getting data
 
-        let s = await apis.get7tvGlobalEmotes()
-        if (s != undefined) {
-         this.Emotes = this.Emotes.concat(s)
-        }
         this.Emotes = this.Emotes.concat(await apis.get7tvGlobalEmotes())
+        console.log("loaded 7tv global emotes")
         this.Emotes = this.Emotes.concat(await apis.getBttvGlobalEmotes())
+        console.log("loaded bttv global emotes")
         this.Emotes = this.Emotes.concat(await apis.getFfzEmotes(this.channel))
+        console.log("loaded ffz channel emotes")
         this.Emotes = this.Emotes.concat(await apis.getFfzGlobalEmotes())
+        console.log("loaded ffz global emotes")
 
         let gb = await apis.getGlobalBadges()
         if (this.GlobalBadges["subscriber"]) {
