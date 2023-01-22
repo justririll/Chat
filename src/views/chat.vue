@@ -88,7 +88,6 @@
           }
         }
         this.client.OnPrivateMessage = async (payload) => {
-          console.log(payload)
           payload.BG = "#2b2b2b"
           if (this.altBG) {
             payload.BG = this.currBG ? "#2b2b2b" : "#242424"

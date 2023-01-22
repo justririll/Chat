@@ -25,7 +25,7 @@ export default {
         fontSize: "18",
         interpolateSize: "1",
 
-        Messages: [this.generateMessage("zhestykey", "zhestykey", "forsenPls", 0, "#2E8B57", "123"), this.generateMessage("juuuuuustriiiiiiriiiiiill", "juuuuuustriiiiiiriiiiiill", "))", 1, "#63F07E", "407046453")],
+        // Messages: [this.generateMessage("zhestykey", "zhestykey", "forsenPls", 0, "#2E8B57", "123"), this.generateMessage("juuuuuustriiiiiiriiiiiill", "juuuuuustriiiiiiriiiiiill", "))", 1, "#63F07E", "407046453")],
         Emotes: [{"Name": "forsenPls", "Type": "7TV", "ID": "603cacd216b3f90014d31852"}, {"Name": "))", "Type": "7TV", "ID": "63a05045ac1cf3ca937e4beb"}],
         Badges: {"vip": {
                     "1": "https://static-cdn.jtvnw.net/badges/v1/b817aba4-fad8-49e2-b88a-7cc744dfa6ec/2"

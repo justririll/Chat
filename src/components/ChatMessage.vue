@@ -194,7 +194,7 @@ export default {
   }
   .Badge img {
     width: v-bind(badgeSize);
-    vertical-align: middle;
+    /* vertical-align: middle; */
   }
   .ChatMessage {
     padding-top: 3px;
