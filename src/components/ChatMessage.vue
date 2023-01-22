@@ -214,6 +214,7 @@ export default {
   }
   .message-text {
     bottom: 5px;
+    margin-right: 13px;
   }
   .message-text img, .emoji {
     height: v-bind(emoteSize);

@@ -19,7 +19,7 @@ export default class Twitch {
             return
         }
 
-        this.ws = new WebSocket("ws://irc-ws.chat.twitch.tv:80");
+        this.ws = new WebSocket("wss://irc-ws.chat.twitch.tv:443");
         this.ws.onmessage = (e) => this.onMessage(e)
         this.ws.onopen = () => this.onOpen()
         this.ws.onerror = () => this.onError()
