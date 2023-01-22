@@ -113,7 +113,12 @@
         this.Emotes = this.Emotes.concat(await apis.getFfzEmotes(this.channel))
         this.Emotes = this.Emotes.concat(await apis.getFfzGlobalEmotes())
 
-        this.GlobalBadges = await apis.getGlobalBadges()
+        let gb = await apis.getGlobalBadges()
+        if (this.GlobalBadges["subscriber"]) {
+          gb["subscriber"] = this.GlobalBadges["subscriber"]
+        }
+        this.GlobalBadges = gb
+
         let bp = await apis.get7tvBadgesPaints()
         this.OtherBadges = bp[0]
         this.Paints = bp[1]
