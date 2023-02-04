@@ -24,7 +24,6 @@ var Huita = {
         }
     },
     async getSubscriberBadges(user_id) {
-        // https://badges.twitch.tv/v1/badges/channels/{user_id}/display
             let subscriber = {}
 
             const response = await fetch(`https://badges.twitch.tv/v1/badges/channels/${user_id}/display`)
@@ -91,7 +90,6 @@ var Huita = {
     async getBttvEmotes(user_id) {
         try {
             let emotes = []
-            // @bug if channel have not either shared or channel emotes, he will not have any bttv emotes
             const response = await fetch(`https://api.betterttv.net/3/cached/users/twitch/${user_id}`)
             const json = await response.json()
             if (json["sharedEmotes"]) {
