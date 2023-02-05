@@ -13,8 +13,6 @@ var Common = {
         message = message.replace(/([\u2700-\u27BF]|[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD10-\uDDFF])/g, 'a');
         for (const [i,k] of Object.entries(smiles)) {
           let smile
-          console.log(i)
-          console.log(k)
           if (parseInt(k[0]["endPosition"]) - k[0]["startPosition"] == 1){
             console.log("123")
             smile = message.substring(k[0]["startPosition"], parseInt(k[0]["endPosition"])+2).trim()
