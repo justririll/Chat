@@ -37,7 +37,7 @@ var Huita = {
 
             const response = await fetch(`https://badges.twitch.tv/v1/badges/channels/${user_id}/display`)
             const json = await response.json()
-            if (response.ok) {
+            if (response.ok && Object.keys(json).lenght > 0) {
                 let vers = json["badge_sets"]["subscriber"]["versions"]
                 let finalVersions = {}
                 for (const [key, value] of Object.entries(vers)) {
@@ -67,19 +67,18 @@ var Huita = {
         }
     },
     async get7tvEmotes(user_id) {
-        try {
-            let emotes = []
+        let emotes = []
 
-            const response = await fetch(`https://7tv.io/v3/users/twitch/${user_id}`)
+        const response = await fetch(`https://7tv.io/v3/users/twitch/${user_id}`)
+        if (response.ok) {
             const json = await response.json()
             for (const value of json["emote_set"]["emotes"]) {
                 emotes.push({"Name": value.name, "ID": value.id, "Type": "7TV", "ZeroWidth": value.flags == 1})
             }
             return [emotes, json["emote_set"]["id"]]
-        } catch (error) {
-            console.log(`Unable to get 7tv channel emotes: ${error}`)
-            return []
         }
+        console.log(`Unable to get 7tv channel emotes`)
+        return []
     },
     async get7tvGlobalEmotes() {
         try {
