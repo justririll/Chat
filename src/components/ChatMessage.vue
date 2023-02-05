@@ -34,7 +34,7 @@ export default {
       color : "",
 
       Badges: [],
-       paintsEnabled: this.$route.query.paints || "1",
+      paintsEnabled: this.$route.query.paints || "1",
       font_size: this.$route.query.font_size || "18",
       interpolateSize: this.$route.query.interpbs != "0",
     }
@@ -223,7 +223,7 @@ export default {
   .message-nick {
     font-weight: 700;
 
-    /* background-size: cover; */
+    background-size: cover;
     filter: v-bind('filter');
     color: v-bind('paintColor');
   }

@@ -3,6 +3,15 @@
 // @todo: сделать таймаут на получение всякой хуеты если произошла ошибка кроме 404
 
 var Huita = {
+    async getUserID(channel) {
+        const response = await fetch(`https://api.ivr.fi/v2/twitch/user?login=${channel}`)
+        if (response.ok) {
+            console.log("IVR API successful, getting user-id...")
+            const json = await response.json()
+            return json[0].id
+        }
+        throw "Unable to get user id from ivr API!"
+    },
     async getGlobalBadges() {
         try {
             let badges = {}

@@ -63,28 +63,32 @@
           }
         }
         this.Emotes.push({"Name": e.value.name, "ID": e.value.id, "Type": "7TV"})
-      }
+      },
+      async onUserID(id) {
+          if (this.channelID == null) {
+            this.channelID = id
+
+            let subs = await apis.getSubscriberBadges(this.channelID)
+            if (subs) {
+              this.GlobalBadges["subscriber"] = subs
+            }
+            let stv = await apis.get7tvEmotes(this.channelID)
+            this.Emotes = this.Emotes.concat(stv[0])
+            this.Emotes = this.Emotes.concat(await apis.getBttvEmotes(this.channelID))
+
+            // initializing event api
+            if (this.useEventAPI) {
+              this.EventApi = new EventApi(stv[1], this.channelID, this.onEmoteDelete, this.onEmoteAdd, this.onEmoteRename)
+              this.EventApi.Connect()
+            }
+          }
+        }
     },
     created: async function() {
         // creating websocket
         this.client = new Twitch(this.channel);
 
-        this.client.OnUserId = async (id) => {
-          this.channelID = id
-          let subs = await apis.getSubscriberBadges(this.channelID)
-          if (subs) {
-            this.GlobalBadges["subscriber"] = subs
-          }
-          let stv = await apis.get7tvEmotes(this.channelID)
-          this.Emotes = this.Emotes.concat(stv[0])
-          this.Emotes = this.Emotes.concat(await apis.getBttvEmotes(this.channelID))
-
-          // initializing event api
-          if (this.useEventAPI) {
-            this.EventApi = new EventApi(stv[1], this.channelID, this.onEmoteDelete, this.onEmoteAdd, this.onEmoteRename)
-            this.EventApi.Connect()
-          }
-        }
+        this.client.OnUserId = this.onUserID
         this.client.OnPrivateMessage = async (payload) => {
           payload.BG = "#2b2b2b"
           if (this.altBG) {
@@ -102,6 +106,13 @@
 
         this.client.connect()
         // getting data
+
+        try {
+          let userid = await apis.getUserID(this.channel)
+          this.onUserID(userid)
+        } catch (error) {
+          // pass
+        }
 
         this.Emotes = this.Emotes.concat(await apis.get7tvGlobalEmotes())
         console.log("loaded 7tv global emotes")
