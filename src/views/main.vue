@@ -1,7 +1,7 @@
 <template>
 <div id="main">
     <div class="logo">
-      <img src="https://cdn.7tv.app/emote/620a09e68d6b23e0d044ce69/4x.webp">
+      <img src="https://cdn.7tv.app/emote/620a09e68d6b23e0d044ce69/4x.webp" draggable="false">
       <br>
       This page is currently under development
       <br>
@@ -155,6 +155,8 @@ export default {
 
           if (this.Background != "#2b2b2b") additional_query += `&background=${this.BG.substring(1)}`
 
+          if (this.paintsEnabled != "1") additional_query += `&paints=0`
+
           return `https://chat.justririll.com/#/chat?channel=${this.Channel}${additional_query}`
         }
         return `Enter channel to proceed!`
@@ -222,23 +224,24 @@ export default {
     text-align: center;
   }
   .setting {
-      width: 20vw;
+      width: 10vw;
       display: inline-block;
       margin-left: 10vw;
       padding-top: 5vh;
   }
   input {
-      width: 18vw;
+      width: 10vw;
+      height: 4vh;
       background-color: #494949;
       color: white;
       border: 1px solid black;
       border-radius: 8px;
-      font-size: 20px;
+      font-size: 24px;
       text-align: center;
   }
   .checkbox {
     width: 2vw;
     height: 2vh;
-    margin-left: 9vw;
+    margin-left: 4vw;
   }
 </style>
