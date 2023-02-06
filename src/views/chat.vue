@@ -11,6 +11,7 @@
   import apis from '@/methods/tpd.js'
   import EventApi from '@/methods/eventapi.js'
   import Twitch from '@/methods/twitch.js'
+  import Common from '@/methods/common'
   
   export default {
     name: 'chat-page',
@@ -27,6 +28,8 @@
         font_size: this.$route.query.font_size || "18",
         // value: selectedValue != off (true by default)
         altBG: this.$route.query.altbg != "0",
+        BG: this.$route.query.background || "#2b2b2b",
+        BG2: "",
         useEventAPI: this.$route.query.eventapi != "0",
 
         // other:
@@ -88,14 +91,29 @@
         }
     },
     created: async function() {
+        // check for bg:
+        if (this.BG != "#2b2b2b") {
+          this.BG = "#" + this.BG
+        }
+
+        // alt bg creation:
+        if (this.altBG) {
+          let minus = 1
+          let gray = Common.toGray(this.BG) 
+          if (gray > 0.38) {
+            minus = -30/gray
+          }
+          this.BG2 = Common.pSBC(0.01*minus, this.BG)
+        }
+
         // creating websocket
         this.client = new Twitch(this.channel);
 
         this.client.OnUserId = this.onUserID
         this.client.OnPrivateMessage = async (payload) => {
-          payload.BG = "#2b2b2b"
+          payload.BG = this.BG
           if (this.altBG) {
-            payload.BG = this.currBG ? "#2b2b2b" : "#242424"
+            payload.BG = this.currBG ? this.BG : this.BG2
             this.currBG = !this.currBG
           }
           // payload.tags.color = "#000000"

@@ -31,8 +31,6 @@ export default {
       HavePaints: false,
       displayName: "",
 
-      color : "",
-
       dot : 0,
 
       Badges: [],
@@ -60,33 +58,6 @@ export default {
       this.displayName = this.payload.tags["display-name"]
       if (this.payload.tags["display-name"] == undefined) {
         this.displayName = this.payload.user
-      }
-      this.color = this.payload.tags.color
-      if (!this.payload.tags.color) {
-        this.color = this.defaultColors[Math.floor(Math.random() * this.defaultColors.length)]
-      } else {
-        // @todo: добавить убавление яркости
-
-        // если сообщение сливается с фоном:
-        let userRGB = Common.hexToRgb(this.color)
-        let backgroundRGB = Common.hexToRgb(this.BG)
-
-        // схожесть цветов
-        let distance = Math.sqrt(((userRGB[0] - backgroundRGB[0])**2) + ((userRGB[1] - backgroundRGB[1])**2) + ((userRGB[2] - backgroundRGB[2])**2))
-        
-        // let distance = Common.dot_product(userRGB, backgroundRGB)
-
-        this.dot = distance // для дебага
-        if (isNaN(distance)) {
-          distance = 0.07
-        }
-        // console.log(userRGB)
-        // console.log(backgroundRGB)
-        // console.log("###")
-        if (distance < 0.5) {
-          // значит фон сливается, теперь мы добавляем/убавляем +40% яркость пользователю
-          this.color = Common.pSBC(0.4, this.color)
-        }
       }
 
       // twitch badges
@@ -120,6 +91,37 @@ export default {
       //         "Message": this.payload.message, "Badges": Badges}
   },
   computed: {
+    color() {
+      let color = this.payload.tags.color
+      if (!this.payload.tags.color) {
+        return this.defaultColors[Math.floor(Math.random() * this.defaultColors.length)]
+      } else {
+        // @todo: добавить убавление яркости
+
+        // если сообщение сливается с фоном:
+        let userRGB = Common.hexToRgb(color)
+        let backgroundRGB = Common.hexToRgb(this.BG)
+
+        // схожесть цветов
+        let distance = Math.sqrt(((userRGB[0] - backgroundRGB[0])**2) + ((userRGB[1] - backgroundRGB[1])**2) + ((userRGB[2] - backgroundRGB[2])**2))
+        
+        // let distance = Common.dot_product(userRGB, backgroundRGB)
+
+        if (isNaN(distance)) {
+          distance = 0.07
+        }
+        // console.log(userRGB)
+        // console.log(backgroundRGB)
+        // console.log("###")
+        if (distance < 0.5) {
+          // значит фон сливается, теперь мы добавляем/убавляем +40% яркость пользователю
+          let gray = Common.toGray(this.color)
+          if (gray > 0.6) return Common.pSBC(-0.4, color)
+          else return Common.pSBC(0.4, color)
+        }
+      }
+      return color
+    },
     FinalMessage() { // message with emotes and etc.
       let TempMessage = ` ${this.payload.parameters} `
 

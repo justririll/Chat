@@ -4,6 +4,11 @@ function componentToHex(c) {
   return hex.length == 1 ? "0" + hex : hex;
 }
 
+function hexToRgb(hex) {
+  var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  return result ? [parseInt(result[1], 16)/255, parseInt(result[2], 16)/255, parseInt(result[3], 16)/255] : null
+}
+
 var Common = {
     DecimalToStringRGBA(num) {
         const r = (num >>> 24) & 0xff;
@@ -12,6 +17,11 @@ var Common = {
         const a = num & 0xff;
     
         return `rgba(${r}, ${g}, ${b}, ${(a / 255).toFixed(3)})`;
+    },
+
+    toGray(color) {
+      let rgb = hexToRgb(color)
+      return (rgb[0]*0.2126) + (rgb[1]*0.7152) + (0.0722*rgb[2])
     },
 
     pSBC(p,c0,c1,l) {

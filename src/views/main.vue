@@ -17,12 +17,20 @@
         <div class="setting-name">Font size</div>
         <input type="number" :value="fontSize" min="8" max="50" @change="onChangeFontSize">
     </div>
+    <div class="setting">
+        <div class="setting-name">Background color</div>
+        <input type="text" :value="Background" @change="onChangeBackground">
+    </div>
+    <div class="setting">
+        <div class="setting-name">Enable 7TV paints</div>
+        <input class="checkbox" type="checkbox" @change="onChangePaints" checked>
+    </div>
 
     <div class="example-chat">
       <div id="chat">
         <ChatMessage v-for="mes in Messages" :key="mes"
           :Emotes="Emotes" :Paints="Paints" :GlobalBadges="Badges"
-          :payload="mes" :BG="mes.BG" :paintsEnabled="paintsEnabled" 
+          :payload="mes" :BG="BGS[mes.BG]" :paintsEnabled="paintsEnabled" 
           :font_size="fontSize" :interpolateSize="interpolateSize"/>
       </div>
     </div>
@@ -35,6 +43,7 @@
 
 <script>
 import ChatMessage from '@/components/ChatMessage_example.vue'
+import Common from '@/methods/common'
 
 export default {
     name: 'main-page',
@@ -47,8 +56,9 @@ export default {
         fontSize: "18",
         interpolateSize: "1",
         Channel: "",
+        Background: "#2b2b2b",
 
-        Messages: [this.generateMessage("i0uz", "I0uz", "forsenPls", 0, "#59D9FF", "123"), this.generateMessage("juuuuuustriiiiiiriiiiiill", "ㅿ4ㅿ3ㅿ2ㅿ1ㅿ2ㅿ3ㅿ4", "))", 1, "#63F07E", "407046453")],
+        Messages: [this.generateMessage("i0uz", "I0uz", "forsenPls", 0, "#59D9FF", "123"), this.generateMessage("juuuuuustriiiiiiriiiiiill", "ㅿ4ㅿ3ㅿ2ㅿ1ㅿ2ㅿ3ㅿ4", "))", 1, "#FFFFFF", "407046453")],
         Emotes: [{"Name": "forsenPls", "Type": "7TV", "ID": "603cacd216b3f90014d31852"}, {"Name": "))", "Type": "7TV", "ID": "63a05045ac1cf3ca937e4beb"}],
         Badges: {"vip": {
                     "1": "https://static-cdn.jtvnw.net/badges/v1/b817aba4-fad8-49e2-b88a-7cc744dfa6ec/2"
@@ -101,7 +111,7 @@ export default {
       }
     },
     methods: {
-      generateMessage(nickname, displayName, message, bg, color, userid) {
+      generateMessage(nickname, displayName, message, currbg, color, userid) {
         return {
             "tags": {
                 "badges": {
@@ -119,7 +129,7 @@ export default {
                 "command": "PRIVMSG",
             },
             "parameters": message,
-            "BG": ["#2b2b2b", "#242424"][bg]
+            "BG": currbg
         }
       },
       onChangeFontSize(event) {
@@ -129,14 +139,43 @@ export default {
       },
       onChangeChannel(event) {
         this.Channel = event.target.value
+      },
+      onChangeBackground(event) {
+        if (event.target.value.length == 6 || event.target.value.length == 7) this.Background = event.target.value
+      },
+      onChangePaints() {
+        this.paintsEnabled = this.paintsEnabled == "1" ? "0" : "1"
       }
     },
     computed: {
       out_url() {
+        let additional_query = ""
         if (this.Channel != "") {
-          return `https://chat.justririll.com/#/chat?channel=${this.Channel}&font_size=${this.fontSize}`
+          if (this.fontSize != 18) additional_query += `&font_size=${this.fontSize}`
+
+          if (this.Background != "#2b2b2b") additional_query += `&background=${this.BG.substring(1)}`
+
+          return `https://chat.justririll.com/#/chat?channel=${this.Channel}${additional_query}`
         }
         return `Enter channel to proceed!`
+      },
+      BG() {
+        if (this.Background[0] == "#") {
+          return this.Background
+        }
+        return "#" + this.Background
+      },
+      BG2() {
+        let minus = 1
+          let gray = Common.toGray(this.BG) 
+          if (gray > 0.38) {
+            minus = -30/gray
+          }
+
+          return Common.pSBC(0.01*minus, this.BG)
+      },
+      BGS() {
+        return [this.BG, this.BG2]
       }
     }
 }
@@ -149,13 +188,14 @@ export default {
     text-align: center;
   }
   .out_url {
-    width: 50vw;
-    height: 2vh;
+    width: 80vw;
+    height: 3vh;
+    text-align: start;
   }
   .out {
-    margin-left: 23vw;
+    margin-left: 10vw;
     display: inline-block;
-    padding-top: 40vh;
+    padding-top: 20vh;
   }
   .example-chat {
     position: relative;
@@ -182,12 +222,23 @@ export default {
     text-align: center;
   }
   .setting {
-      width: 18vw;
+      width: 20vw;
       display: inline-block;
-      margin-left: 20vw;
+      margin-left: 10vw;
       padding-top: 5vh;
   }
   input {
       width: 18vw;
+      background-color: #494949;
+      color: white;
+      border: 1px solid black;
+      border-radius: 8px;
+      font-size: 20px;
+      text-align: center;
+  }
+  .checkbox {
+    width: 2vw;
+    height: 2vh;
+    margin-left: 9vw;
   }
 </style>
