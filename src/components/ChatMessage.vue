@@ -33,8 +33,11 @@ export default {
 
       color : "",
 
+      dot : 0,
+
       Badges: [],
       paintsEnabled: this.$route.query.paints || "1",
+      shadowText: this.$route.query.shadowtext || "0",
       font_size: this.$route.query.font_size || "18",
       interpolateSize: this.$route.query.interpbs != "0",
     }
@@ -61,7 +64,31 @@ export default {
       this.color = this.payload.tags.color
       if (!this.payload.tags.color) {
         this.color = this.defaultColors[Math.floor(Math.random() * this.defaultColors.length)]
+      } else {
+        // @todo: добавить убавление яркости
+
+        // если сообщение сливается с фоном:
+        let userRGB = Common.hexToRgb(this.color)
+        let backgroundRGB = Common.hexToRgb(this.BG)
+
+        // схожесть цветов
+        let distance = Math.sqrt(((userRGB[0] - backgroundRGB[0])**2) + ((userRGB[1] - backgroundRGB[1])**2) + ((userRGB[2] - backgroundRGB[2])**2))
+        
+        // let distance = Common.dot_product(userRGB, backgroundRGB)
+
+        this.dot = distance // для дебага
+        if (isNaN(distance)) {
+          distance = 0.07
+        }
+        // console.log(userRGB)
+        // console.log(backgroundRGB)
+        // console.log("###")
+        if (distance < 0.5) {
+          // значит фон сливается, теперь мы добавляем/убавляем +40% яркость пользователю
+          this.color = Common.pSBC(0.4, this.color)
+        }
       }
+
       // twitch badges
       if (this.payload.tags.badges) {
         for (const [key, value] of Object.entries(this.payload.tags["badges"])) {
@@ -117,6 +144,7 @@ export default {
         }
       }
       TempMessage = twemoji.parse(TempMessage)
+
       return TempMessage
     },
     bgImage() {
@@ -147,12 +175,21 @@ export default {
       }
       return `${funcPrefix}${ccsFunc}(${args.join(", ")})`
     },
+    filterText() {
+      if (this.shadowText == "1") {
+        return "drop-shadow(-1px 2px 1px #2b2b2b)"
+      }
+      return ""
+    },
     filter() {
       try {
         return this.Paint.drop_shadows
         .map((v) => `drop-shadow(${v.x_offset}px ${v.y_offset}px ${v.radius}px ${Common.DecimalToStringRGBA(v.color)})`)
         .join(" ");
       } catch (error) {
+        if (this.shadowText == "1") {
+          return "drop-shadow(-1px 2px 1px #2b2b2b)"
+        }
         return ""
       }
     },
@@ -215,10 +252,13 @@ export default {
   .message-text {
     bottom: 5px;
     margin-right: 13px;
+    filter: v-bind('filterText');
   }
+
   .message-text img, .emoji {
     height: v-bind(emoteSize);
     vertical-align: middle;
+    filter: unset;
   }
   .message-nick {
     font-weight: 700;

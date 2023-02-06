@@ -37,7 +37,7 @@ var Huita = {
 
             const response = await fetch(`https://badges.twitch.tv/v1/badges/channels/${user_id}/display`)
             const json = await response.json()
-            if (response.ok && Object.keys(json).lenght > 0) {
+            if (response.ok && Object.keys(json).length > 0) {
                 let vers = json["badge_sets"]["subscriber"]["versions"]
                 let finalVersions = {}
                 for (const [key, value] of Object.entries(vers)) {

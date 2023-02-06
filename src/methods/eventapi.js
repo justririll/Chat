@@ -28,7 +28,7 @@ class EventAPI {
 
     onMessage(e) {
         let json = JSON.parse(e.data)
-        console.log(json)
+        // console.log(json)
         switch (json.op) {
             case 1: {
                 this.subscribeToEvent("emote_set.*", {"object_id": this.set_id})

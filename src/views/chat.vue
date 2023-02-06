@@ -73,8 +73,11 @@
               this.GlobalBadges["subscriber"] = subs
             }
             let stv = await apis.get7tvEmotes(this.channelID)
+            console.log(this.Emotes.length)
             this.Emotes = this.Emotes.concat(stv[0])
+            console.log(this.Emotes.length)
             this.Emotes = this.Emotes.concat(await apis.getBttvEmotes(this.channelID))
+            console.log(this.Emotes.length)
 
             // initializing event api
             if (this.useEventAPI) {
@@ -95,6 +98,7 @@
             payload.BG = this.currBG ? "#2b2b2b" : "#242424"
             this.currBG = !this.currBG
           }
+          // payload.tags.color = "#000000"
           this.Messages.push(payload)
         }
         this.client.OnClearChat = async (payload) => {
@@ -109,7 +113,7 @@
 
         try {
           let userid = await apis.getUserID(this.channel)
-          this.onUserID(userid)
+          await this.onUserID(userid)
         } catch (error) {
           // pass
         }
@@ -131,6 +135,7 @@
 
         let bp = await apis.get7tvBadgesPaints()
         this.OtherBadges = bp[0]
+        this.OtherBadges.push({"Users": ["407046453"], "Url": "https://i.imgur.com/qgO1Y7A.png"}) // chat custom badges
         this.Paints = bp[1]
     }
   }
@@ -147,7 +152,6 @@
     padding: 0;
 
     overflow: hidden;
-
   }
 </style>
   
