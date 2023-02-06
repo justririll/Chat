@@ -135,7 +135,8 @@
 
         let bp = await apis.get7tvBadgesPaints()
         this.OtherBadges = bp[0]
-        this.OtherBadges.push({"Users": ["407046453"], "Url": "https://i.imgur.com/qgO1Y7A.png"}) // chat custom badges
+        this.OtherBadges.push({"Users": ["407046453"], "Url": "https://i.imgur.com/qgO1Y7A.png"}) // custom badges )))
+        this.OtherBadges.push({"Users": ["69078167"], "Url": "https://i.imgur.com/nIm3MvW.gif"})
         this.Paints = bp[1]
     }
   }
