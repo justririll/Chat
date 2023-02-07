@@ -232,7 +232,7 @@ export default {
     padding-right: 3px;
   }
   .Badge img {
-    width: v-bind(badgeSize);
+    height: v-bind(badgeSize);
     /* vertical-align: middle; */
   }
   .ChatMessage {

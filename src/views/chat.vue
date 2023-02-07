@@ -78,11 +78,8 @@
             }
             let stv = await apis.get7tvEmotes(this.channelID)
             console.log("loaded seventv channel")
-            console.log(this.Emotes.length)
             this.Emotes = this.Emotes.concat(stv[0])
-            console.log(this.Emotes.length)
             this.Emotes = this.Emotes.concat(await apis.getBttvEmotes(this.channelID))
-            console.log(this.Emotes.length)
 
             // initializing event api
             if (this.useEventAPI) {
@@ -156,6 +153,7 @@
         let bp = await apis.get7tvBadgesPaints()
         this.OtherBadges = bp[0]
         this.OtherBadges.unshift({"Users": ["407046453"], "Url": "https://i.imgur.com/qgO1Y7A.png"}) // custom badges )))
+        this.OtherBadges.unshift({"Users": ["521810742"], "Url": "https://cdn.7tv.app/emote/63d6ed00349f81ba10452fdd/2x.webp"})
         this.OtherBadges.unshift({"Users": ["69078167"], "Url": "https://i.imgur.com/nIm3MvW.gif"})
         this.OtherBadges.unshift({"Users": ["489131898"], "Url": "https://i.imgur.com/Kg7X4ga.gif"})
         this.Paints = bp[1]

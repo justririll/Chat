@@ -45,7 +45,6 @@ var Huita = {
             }
             subscriber = finalVersions
         }
-        console.log("returning")
         return subscriber
     },
     async get7tvBadgesPaints() {
