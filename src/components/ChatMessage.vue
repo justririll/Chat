@@ -115,7 +115,7 @@ export default {
         // console.log("###")
         if (distance < 0.5) {
           // значит фон сливается, теперь мы добавляем/убавляем +40% яркость пользователю
-          let gray = Common.toGray(this.color)
+          let gray = Common.toGray(color)
           if (gray > 0.6) return Common.pSBC(-0.4, color)
           else return Common.pSBC(0.4, color)
         }
