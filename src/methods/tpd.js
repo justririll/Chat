@@ -33,19 +33,20 @@ var Huita = {
         }
     },
     async getSubscriberBadges(user_id) {
-            let subscriber = {}
+        let subscriber = {}
 
-            const response = await fetch(`https://badges.twitch.tv/v1/badges/channels/${user_id}/display`)
-            const json = await response.json()
-            if (response.ok && Object.keys(json).length > 0) {
-                let vers = json["badge_sets"]["subscriber"]["versions"]
-                let finalVersions = {}
-                for (const [key, value] of Object.entries(vers)) {
-                    finalVersions[key] = value["image_url_2x"]
-                }
-                subscriber = finalVersions
+        const response = await fetch(`https://badges.twitch.tv/v1/badges/channels/${user_id}/display`)
+        const json = await response.json()
+        if (response.ok && Object.keys(json.badge_sets).length > 0) {
+            let vers = json["badge_sets"]["subscriber"]["versions"]
+            let finalVersions = {}
+            for (const [key, value] of Object.entries(vers)) {
+                finalVersions[key] = value["image_url_2x"]
             }
-            return subscriber
+            subscriber = finalVersions
+        }
+        console.log("returning")
+        return subscriber
     },
     async get7tvBadgesPaints() {
         try {

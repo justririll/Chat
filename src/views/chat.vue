@@ -68,14 +68,16 @@
         this.Emotes.push({"Name": e.value.name, "ID": e.value.id, "Type": "7TV"})
       },
       async onUserID(id) {
+          console.log(this.channelID)
           if (this.channelID == null) {
             this.channelID = id
-
             let subs = await apis.getSubscriberBadges(this.channelID)
             if (subs) {
               this.GlobalBadges["subscriber"] = subs
+              console.log("loaded sub badges")
             }
             let stv = await apis.get7tvEmotes(this.channelID)
+            console.log("loaded seventv channel")
             console.log(this.Emotes.length)
             this.Emotes = this.Emotes.concat(stv[0])
             console.log(this.Emotes.length)
@@ -155,6 +157,7 @@
         this.OtherBadges = bp[0]
         this.OtherBadges.unshift({"Users": ["407046453"], "Url": "https://i.imgur.com/qgO1Y7A.png"}) // custom badges )))
         this.OtherBadges.unshift({"Users": ["69078167"], "Url": "https://i.imgur.com/nIm3MvW.gif"})
+        this.OtherBadges.unshift({"Users": ["489131898"], "Url": "https://i.imgur.com/Kg7X4ga.gif"})
         this.Paints = bp[1]
     }
   }
