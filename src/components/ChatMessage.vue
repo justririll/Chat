@@ -148,7 +148,7 @@ export default {
         let twitchEmotes = Common.parse_smiles(TempMessage, this.payload.tags["emotes"])
         for (const [em, url] of Object.entries(twitchEmotes)) {
           for (const i in f_mes) {
-            if (f_mes[i].Text == em) {
+            if (f_mes[i].Text.slice(0, -1) == em) {
               f_mes[i].Type = "emote"
               f_mes[i].Text = url
               f_mes[i].ZeroWidth = false
@@ -159,7 +159,7 @@ export default {
 
       for (const em of this.Emotes) {
         for (const i in f_mes) {
-          if (f_mes[i].Text == em.Name) {
+          if (f_mes[i].Text.slice(0, -1) == em.Name) {
             f_mes[i].Type = "emote"
             f_mes[i].Text = this.EmotesBaseUrl[em.Type].replace('{0}', em.ID)
             f_mes[i].ZeroWidth = em.ZeroWidth

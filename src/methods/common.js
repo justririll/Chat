@@ -15,7 +15,7 @@ var Common = {
     for (const key of text.split(" ")) {
       let m = key.trim()
       if (m == "") continue
-      r.push({"Type": "text", "Text": m})
+      r.push({"Type": "text", "Text": m+" "})
     }
     return r
   },
