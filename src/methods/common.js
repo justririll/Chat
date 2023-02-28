@@ -10,6 +10,16 @@ function hexToRgb(hex) {
 }
 
 var Common = {
+  textToMessageObject(text) {
+    let r = []
+    for (const key of text.split(" ")) {
+      let m = key.trim()
+      if (m == "") continue
+      r.push({"Type": "text", "Text": m})
+    }
+    return r
+  },
+
   getEmote(emotes, name) {
     for (const em of emotes) {
       if (em.Name == name) {

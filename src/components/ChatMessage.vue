@@ -138,57 +138,75 @@ export default {
       return color
     },
     FinalMessage() {
-      let TempMessage = ` ${this.payload.parameters} `
-
-      let f_mes = []
-
-      let twitchEmotes = {}
-      if (this.payload.tags.emotes) {
-        twitchEmotes = Common.parse_smiles(TempMessage, this.payload.tags["emotes"])
-      }
+      let TempMessage = `${this.payload.parameters}`
 
       // TempMessage = twemoji.parse(TempMessage)
 
-      for (let m of TempMessage.split(" ")) {
-        m = m.trim()
+      let f_mes = Common.textToMessageObject(TempMessage)
 
-        if (m == "") {
-          continue
-        }
-
-        let tw_contains = false
-        let tw_emote = []
-        if (this.payload.tags.emotes) {
-          let tw = Common.getEmoteTwitch(twitchEmotes, m)
-          tw_contains = tw[0]
-          tw_emote = tw[1]
-        }
-
-        let gl = Common.getEmote(this.Emotes, m)
-        let gl_contains = gl[0]
-        let gl_emote = gl[1]
-
-        if (tw_contains == true && gl_contains == true) {
-          tw_contains = false
-        }
-
-        switch (true) {
-          case tw_contains:
-            f_mes.push({"Type": "emote", "Text": tw_emote, "ZeroWidth": false})
-            break;
-          
-          case gl_contains:
-            if (gl_emote.ZeroWidth) {
-              f_mes.push({"Type": "emote", "Text": this.EmotesBaseUrl[gl_emote.Type].replace('{0}', gl_emote.ID), "ZeroWidth": true})
-            } else {
-              f_mes.push({"Type": "emote", "Text": this.EmotesBaseUrl[gl_emote.Type].replace('{0}', gl_emote.ID), "ZeroWidth": false})
+      if (this.payload.tags.emotes) {
+        let twitchEmotes = Common.parse_smiles(TempMessage, this.payload.tags["emotes"])
+        for (const [em, url] of Object.entries(twitchEmotes)) {
+          for (const i in f_mes) {
+            if (f_mes[i].Text == em) {
+              f_mes[i].Type = "emote"
+              f_mes[i].Text = url
+              f_mes[i].ZeroWidth = false
             }
-            break;
-        
-          default:
-            f_mes.push({"Type": "text", "Text": m+" "})
+          }
         }
       }
+
+      for (const em of this.Emotes) {
+        for (const i in f_mes) {
+          if (f_mes[i].Text == em.Name) {
+            f_mes[i].Type = "emote"
+            f_mes[i].Text = this.EmotesBaseUrl[em.Type].replace('{0}', em.ID)
+            f_mes[i].ZeroWidth = em.ZeroWidth
+          }
+        }
+      }
+
+      // for (let m of TempMessage.split(" ")) {
+      //   m = m.trim()
+
+      //   if (m == "") {
+      //     continue
+      //   }
+
+      //   let tw_contains = false
+      //   let tw_emote = []
+      //   if (this.payload.tags.emotes) {
+      //     let tw = Common.getEmoteTwitch(twitchEmotes, m)
+      //     tw_contains = tw[0]
+      //     tw_emote = tw[1]
+      //   }
+
+      //   let gl = Common.getEmote(this.Emotes, m)
+      //   let gl_contains = gl[0]
+      //   let gl_emote = gl[1]
+
+      //   if (tw_contains == true && gl_contains == true) {
+      //     tw_contains = false
+      //   }
+
+      //   switch (true) {
+      //     case tw_contains:
+      //       f_mes.push({"Type": "emote", "Text": tw_emote, "ZeroWidth": false})
+      //       break;
+          
+      //     case gl_contains:
+      //       if (gl_emote.ZeroWidth) {
+      //         f_mes.push({"Type": "emote", "Text": this.EmotesBaseUrl[gl_emote.Type].replace('{0}', gl_emote.ID), "ZeroWidth": true})
+      //       } else {
+      //         f_mes.push({"Type": "emote", "Text": this.EmotesBaseUrl[gl_emote.Type].replace('{0}', gl_emote.ID), "ZeroWidth": false})
+      //       }
+      //       break;
+        
+      //     default:
+      //       f_mes.push({"Type": "text", "Text": m+" "})
+      //   }
+      // }
 
       return f_mes
     },
