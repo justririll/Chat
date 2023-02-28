@@ -14,6 +14,7 @@
 <script>
 import Common from '@/methods/common'
 import twemoji from 'twemoji'
+import ColourDistance from '@/methods/colour'
 
 // @todo: zero-width emotes
 
@@ -92,34 +93,47 @@ created: async function() {
 },
 computed: {
   color() {
-    let color = this.payload.tags.color
-    if (!this.payload.tags.color) {
-      return this.defaultColors[Math.floor(Math.random() * this.defaultColors.length)]
-    } else {
-      // если сообщение сливается с фоном:
-      let userRGB = Common.hexToRgb(color)
-      let backgroundRGB = Common.hexToRgb(this.BG)
-
-      // схожесть цветов
-      let distance = Math.sqrt(((userRGB[0] - backgroundRGB[0])**2) + ((userRGB[1] - backgroundRGB[1])**2) + ((userRGB[2] - backgroundRGB[2])**2))
-      
-      // let distance = Common.dot_product(userRGB, backgroundRGB)
-
-      if (isNaN(distance)) {
-        distance = 0.07
+      let color = this.payload.tags.color
+      if (!this.payload.tags.color) {
+        color = this.defaultColors[Math.floor(Math.random() * this.defaultColors.length)]
       }
-      // console.log(userRGB)
-      // console.log(backgroundRGB)
-      // console.log("###")
-      if (distance < 0.5) {
-        // значит фон сливается, теперь мы добавляем/убавляем +40% яркость пользователю
-        let gray = Common.toGray(this.color)
-        if (gray > 0.6) return Common.pSBC(-0.4, color)
-        else return Common.pSBC(0.4, color)
+      // @todo: добавить убавление яркости
+      if (this.BG != "transparent") {
+
+        // если сообщение сливается с фоном:
+        let userRGB = Common.hexToRgb(color)
+        let backgroundRGB = Common.hexToRgb(this.BG)
+
+        // схожесть цветов
+        // let distance = Math.sqrt(((userRGB[0] - backgroundRGB[0])**2) + ((userRGB[1] - backgroundRGB[1])**2) + ((userRGB[2] - backgroundRGB[2])**2))
+
+        let userXYZ = ColourDistance.rgb2xyz(userRGB[0], userRGB[1], userRGB[2])
+        let backgroundXYZ = ColourDistance.rgb2xyz(backgroundRGB[0], backgroundRGB[1], backgroundRGB[2])
+
+
+        let distance = ColourDistance.deltaE00(userXYZ[0], userXYZ[1], userXYZ[2], backgroundXYZ[0], backgroundXYZ[1], backgroundXYZ[2]) * 10
+
+        if (distance == 0) {
+          distance = 0.01
+        }
+        if (distance < 0.3) {
+          // значит фон сливается, теперь мы добавляем/убавляем +40% яркость пользователю
+          // let gray = Common.toGray(color)
+          // if (gray > 0.6) {
+          //   let newColor = Common.pSBC(-0.4, color)
+          //   console.log(`Changed ${color} to ${newColor} | distance: ${distance}`)
+          //   return newColor
+          // }
+          // else {
+          let newColor = Common.pSBC(0.2, color)
+          // console.log(`Changed ${color} to ${newColor} | distance: ${distance} | adjust: ${(0.02/distance)*100}`)
+          return newColor
+          // }
+        }
       }
-    }
-    return color
-  },
+      // console.log(`Don't change ${color} | distance: ${distance}`)
+      return color
+    },
   FinalMessage() { // message with emotes and etc.
     let TempMessage = ` ${this.payload.parameters} `
 

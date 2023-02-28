@@ -4,18 +4,22 @@
           <img :src="badge.Url">
       </div>
       <span>
-      <span :HavePaints="HavePaints" v-if="displayName.toLowerCase() == this.payload.source.nick" class="message-nick" :style="{color: color, backgroundImage: bgImage}">{{ displayName }}:</span>
-      <span :HavePaints="HavePaints" v-if="displayName.toLowerCase() != this.payload.source.nick" class="message-nick" :style="{color: color, backgroundImage: bgImage}">{{this.payload.source.nick}} ({{ displayName }}):</span>
-        <span class="message-text" v-html="FinalMessage"></span>
+        <span :HavePaints="HavePaints" v-if="displayName.toLowerCase() == this.payload.source.nick" class="message-nick" :style="{color: color, backgroundImage: bgImage}">{{ displayName }}: </span>
+        <span :HavePaints="HavePaints" v-if="displayName.toLowerCase() != this.payload.source.nick" class="message-nick" :style="{color: color, backgroundImage: bgImage}">{{this.payload.source.nick}} ({{ displayName }}): </span>
+        <span class="message-text">
+          <template v-for="mes in FinalMessage" :key="mes">
+            <img v-if="mes.Type=='emote'" :src="mes.Text" :ZeroWidth="mes.ZeroWidth">
+            <template v-if="mes.Type=='text'">{{mes.Text}}</template>
+          </template>  
+        </span>
       </span>
     </div>
 </template>
 
 <script>
 import Common from '@/methods/common'
-import twemoji from 'twemoji'
-
-// @todo: zero-width emotes
+import ColourDistance from '@/methods/colour'
+// import twemoji from 'twemoji'
 
 export default {
   name: 'ChatMessage',
@@ -94,60 +98,99 @@ export default {
     color() {
       let color = this.payload.tags.color
       if (!this.payload.tags.color) {
-        return this.defaultColors[Math.floor(Math.random() * this.defaultColors.length)]
-      } else {
-        // @todo: добавить убавление яркости
+        color = this.defaultColors[Math.floor(Math.random() * this.defaultColors.length)]
+      }
+      // @todo: добавить убавление яркости
+      if (this.BG != "transparent") {
 
         // если сообщение сливается с фоном:
         let userRGB = Common.hexToRgb(color)
         let backgroundRGB = Common.hexToRgb(this.BG)
 
         // схожесть цветов
-        let distance = Math.sqrt(((userRGB[0] - backgroundRGB[0])**2) + ((userRGB[1] - backgroundRGB[1])**2) + ((userRGB[2] - backgroundRGB[2])**2))
-        
-        // let distance = Common.dot_product(userRGB, backgroundRGB)
+        // let distance = Math.sqrt(((userRGB[0] - backgroundRGB[0])**2) + ((userRGB[1] - backgroundRGB[1])**2) + ((userRGB[2] - backgroundRGB[2])**2))
 
-        if (isNaN(distance)) {
-          distance = 0.07
+        let userXYZ = ColourDistance.rgb2xyz(userRGB[0], userRGB[1], userRGB[2])
+        let backgroundXYZ = ColourDistance.rgb2xyz(backgroundRGB[0], backgroundRGB[1], backgroundRGB[2])
+
+
+        let distance = ColourDistance.deltaE00(userXYZ[0], userXYZ[1], userXYZ[2], backgroundXYZ[0], backgroundXYZ[1], backgroundXYZ[2]) * 10
+
+        if (distance == 0) {
+          distance = 0.01
         }
-        // console.log(userRGB)
-        // console.log(backgroundRGB)
-        // console.log("###")
-        if (distance < 0.5) {
+        if (distance < 0.3) {
           // значит фон сливается, теперь мы добавляем/убавляем +40% яркость пользователю
-          let gray = Common.toGray(color)
-          if (gray > 0.6) return Common.pSBC(-0.4, color)
-          else return Common.pSBC(0.4, color)
+          // let gray = Common.toGray(color)
+          // if (gray > 0.6) {
+          //   let newColor = Common.pSBC(-0.4, color)
+          //   console.log(`Changed ${color} to ${newColor} | distance: ${distance}`)
+          //   return newColor
+          // }
+          // else {
+          let newColor = Common.pSBC(0.2, color)
+          // console.log(`Changed ${color} to ${newColor} | distance: ${distance} | adjust: ${(0.02/distance)*100}`)
+          return newColor
+          // }
         }
       }
+      // console.log(`Don't change ${color} | distance: ${distance}`)
       return color
     },
-    FinalMessage() { // message with emotes and etc.
+    FinalMessage() {
       let TempMessage = ` ${this.payload.parameters} `
 
+      let f_mes = []
+
+      let twitchEmotes = {}
       if (this.payload.tags.emotes) {
-        let twitchEmotes = Common.parse_smiles(TempMessage, this.payload.tags["emotes"])
-        for (const [k,v] of Object.entries(twitchEmotes)) {
-        while (TempMessage.includes(` ${k} `)) {
-          TempMessage = TempMessage.replace(` ${k} `, ` <img src="${v}" class="Emote"> `)
-        }
-      }
+        twitchEmotes = Common.parse_smiles(TempMessage, this.payload.tags["emotes"])
       }
 
-      for (const key of this.Emotes) {
-        if (key) {
-          while (TempMessage.includes(` ${key.Name} `)) {
-            if (key.ZeroWidth) {
-              TempMessage = TempMessage.replace(` ${key.Name} `, ` <img src="${this.EmotesBaseUrl[key.Type].replace('{0}', key.ID)}" class="Emote" ZeroWidth="true"> `)
+      // TempMessage = twemoji.parse(TempMessage)
+
+      for (let m of TempMessage.split(" ")) {
+        m = m.trim()
+
+        if (m == "") {
+          continue
+        }
+
+        let tw_contains = false
+        let tw_emote = []
+        if (this.payload.tags.emotes) {
+          let tw = Common.getEmoteTwitch(twitchEmotes, m)
+          tw_contains = tw[0]
+          tw_emote = tw[1]
+        }
+
+        let gl = Common.getEmote(this.Emotes, m)
+        let gl_contains = gl[0]
+        let gl_emote = gl[1]
+
+        if (tw_contains == true && gl_contains == true) {
+          tw_contains = false
+        }
+
+        switch (true) {
+          case tw_contains:
+            f_mes.push({"Type": "emote", "Text": tw_emote, "ZeroWidth": false})
+            break;
+          
+          case gl_contains:
+            if (gl_emote.ZeroWidth) {
+              f_mes.push({"Type": "emote", "Text": this.EmotesBaseUrl[gl_emote.Type].replace('{0}', gl_emote.ID), "ZeroWidth": true})
             } else {
-              TempMessage = TempMessage.replace(` ${key.Name} `, ` <img src="${this.EmotesBaseUrl[key.Type].replace('{0}', key.ID)}" class="Emote"> `)
+              f_mes.push({"Type": "emote", "Text": this.EmotesBaseUrl[gl_emote.Type].replace('{0}', gl_emote.ID), "ZeroWidth": false})
             }
-          }
+            break;
+        
+          default:
+            f_mes.push({"Type": "text", "Text": m+" "})
         }
       }
-      TempMessage = twemoji.parse(TempMessage)
 
-      return TempMessage
+      return f_mes
     },
     bgImage() {
       if (!this.Paint) {

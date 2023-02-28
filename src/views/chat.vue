@@ -43,7 +43,7 @@
         channelID: null,
         client: null,
         Messages: [],
-        defaultColors: ["Blue", "Coral", "DodgerBlue", "SpringGreen", "YellowGreen", "Green", "OrangeRed", "Red", "GoldenRod", "HotPink", "CadetBlue", "SeaGreen", "Chocolate", "BlueViolet", "Firebrick"],
+        defaultColors: ["#4242f7", "#ff7f50", "#1e90ff", "#00ff7f", "#9acd32", "#008000", "#ff4500", "#ff0000", "#daa520", "#ff69b4", "#5f9ea0", "#2e8b57", "#d2691e", "#a065d7", "#b22222"],
       }
     },
     updated() {
@@ -91,18 +91,20 @@
     },
     created: async function() {
         // check for bg:
-        if (this.BG != "#2b2b2b") {
+        if (this.BG != "#2b2b2b" && this.BG != "transparent") {
           this.BG = "#" + this.BG
         }
 
         // alt bg creation:
-        if (this.altBG) {
+        if (this.altBG && this.BG != "transparent") {
           let minus = 1
           let gray = Common.toGray(this.BG) 
           if (gray > 0.38) {
             minus = -30/gray
           }
           this.BG2 = Common.pSBC(0.01*minus, this.BG)
+        } else if (this.BG == "transparent") {
+          this.BG2 = "transparent"
         }
 
         // creating websocket
@@ -115,7 +117,7 @@
             payload.BG = this.currBG ? this.BG : this.BG2
             this.currBG = !this.currBG
           }
-          // payload.tags.color = "#000000"
+          // payload.tags.color = undefined
           this.Messages.push(payload)
         }
         this.client.OnClearChat = async (payload) => {

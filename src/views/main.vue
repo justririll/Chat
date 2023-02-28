@@ -18,7 +18,7 @@
         <input type="number" :value="fontSize" min="8" max="50" @change="onChangeFontSize">
     </div>
     <div class="setting">
-        <div class="setting-name">Background color</div>
+        <div class="setting-name">BG color <div class="setting-description">(write transparent for transparency)</div></div>
         <input type="text" :value="Background" @change="onChangeBackground">
     </div>
     <div class="setting">
@@ -34,6 +34,24 @@
           :font_size="fontSize" :interpolateSize="interpolateSize"/>
       </div>
     </div>
+
+    <div class="setting-bottom">
+        <div class="setting-name">Make some colors readable (TODO)</div>
+        <input type="checkbox" checked>
+    </div>
+    <div class="setting-bottom">
+        <div class="setting-name">Border (TODO)</div>
+        <input type="checkbox" checked>
+    </div>
+    <div class="setting-bottom">
+        <div class="setting-name">Text shadow (TODO)</div>
+        <input type="checkbox" checked>
+    </div>
+    <div class="setting-bottom">
+        <div class="setting-name">7TV EventAPI <div class="setting-description">(auto update 7TV emotes)</div>(TODO)</div>
+        <input type="checkbox" checked>
+    </div>
+
     <div class="out">
       <div class="setting-name">Your URL:</div>
       <input class="out_url" type="text" :value="out_url" readonly>
@@ -134,17 +152,17 @@ export default {
       },
       onChangeFontSize(event) {
         if (parseInt(event.target.value) <= 50 && parseInt(event.target.value) >= 8) {
-          this.fontSize = event.target.value
+          this.fontSize = event.target.value.trim()
         }
       },
       onChangeChannel(event) {
-        this.Channel = event.target.value
+        this.Channel = event.target.value.trim()
       },
       onChangeBackground(event) {
-        if (event.target.value.length == 6 || event.target.value.length == 7) this.Background = event.target.value
+        if (event.target.value.trim().length == 6 || event.target.value.trim().length == 7 || event.target.value.trim() == "transparent") this.Background = event.target.value.trim()
       },
       onChangePaints() {
-        this.paintsEnabled = this.paintsEnabled == "1" ? "0" : "1"
+        this.paintsEnabled = this.paintsEnabled.trim() == "1" ? "0" : "1"
       }
     },
     computed: {
@@ -159,22 +177,25 @@ export default {
 
           return `https://chat.justririll.com/#/chat?channel=${this.Channel}${additional_query}`
         }
-        return `Enter channel to proceed!`
+        return `No channel!`
       },
       BG() {
-        if (this.Background[0] == "#") {
+        if (this.Background[0] == "#" || this.Background == "transparent") {
           return this.Background
         }
         return "#" + this.Background
       },
       BG2() {
+        if (this.Background == "transparent") {
+          return "transparent"
+        }
         let minus = 1
-          let gray = Common.toGray(this.BG) 
-          if (gray > 0.38) {
-            minus = -30/gray
-          }
+        let gray = Common.toGray(this.BG) 
+        if (gray > 0.38) {
+          minus = -30/gray
+        }
 
-          return Common.pSBC(0.01*minus, this.BG)
+        return Common.pSBC(0.01*minus, this.BG)
       },
       BGS() {
         return [this.BG, this.BG2]
@@ -184,26 +205,32 @@ export default {
 </script>
 
 <style>
+  .setting-description {
+    font-size: 12px;
+  }
   .logo {
     font-size: 14px;
-    padding-top: 2vh;
+    padding-top: 2vw;
     text-align: center;
   }
   .out_url {
     width: 80vw;
     height: 3vh;
     text-align: start;
+    font-size: 18px;
   }
   .out {
     margin-left: 10vw;
     display: inline-block;
-    padding-top: 20vh;
+    padding-top: 10vh;
   }
   .example-chat {
     position: relative;
     max-width: 60vw;
     max-height: 10vh;
     left: 20vw;
+
+    z-index: -1;
 
     margin-top: 10vh;
   }
@@ -216,27 +243,37 @@ export default {
     position: fixed;
     top: 0;
     left: 0;
+
+    overflow: auto;
     
     background: rgb(46, 46, 46);
     color: white;
   }
   .setting-name {
     text-align: center;
+    font-size: 24px;
+    width: 10vw;
   }
   .setting {
       width: 10vw;
       display: inline-block;
-      margin-left: 10vw;
+      margin-left: 12vw;
       padding-top: 5vh;
+  }
+  .setting-bottom {
+    width: 10vw;
+    display: inline-block;
+    margin-left: 12vw;
+    padding-top: 10vh;
   }
   input {
       width: 10vw;
-      height: 4vh;
+      height: 2.5vh;
       background-color: #494949;
       color: white;
       border: 1px solid black;
       border-radius: 8px;
-      font-size: 24px;
+      font-size: 2vh;
       text-align: center;
   }
   .checkbox {

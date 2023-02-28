@@ -6,10 +6,50 @@ function componentToHex(c) {
 
 function hexToRgb(hex) {
   var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-  return result ? [parseInt(result[1], 16)/255, parseInt(result[2], 16)/255, parseInt(result[3], 16)/255] : null
+  return result ? [parseInt(result[1], 16), parseInt(result[2], 16), parseInt(result[3], 16)] : null
 }
 
 var Common = {
+  getEmote(emotes, name) {
+    for (const em of emotes) {
+      if (em.Name == name) {
+        return [true, em]
+      }
+    }
+    return [false, {}]
+  },
+
+  getEmoteTwitch(emotes, name) {
+    for (const em in emotes) {
+      if (em == name) {
+        return [true, emotes[em]]
+      }
+    }
+    return [false, {}]
+  },
+
+  magnitude(vector) {
+    let sum = 0;
+    for (let i = 0; i < vector.length; i++) {
+      sum += vector[i] * vector[i];
+    }
+  
+    return Math.sqrt(sum);
+  },
+
+  dot_product(vector1, vector2) {
+    if (vector1.length !== vector2.length) {
+      throw new Error('Vectors must have the same length');
+    }
+  
+    let sum = 0;
+    for (let i = 0; i < vector1.length; i++) {
+      sum += vector1[i] * vector2[i];
+    }
+  
+    return sum;
+  },
+
     DecimalToStringRGBA(num) {
         const r = (num >>> 24) & 0xff;
         const g = (num >>> 16) & 0xff;
@@ -21,7 +61,7 @@ var Common = {
 
     toGray(color) {
       let rgb = hexToRgb(color)
-      return (rgb[0]*0.2126) + (rgb[1]*0.7152) + (0.0722*rgb[2])
+      return ((rgb[0]/255)*0.2126) + ((rgb[1]/255)*0.7152) + (0.0722*(rgb[2]/255))
     },
 
     pSBC(p,c0,c1,l) {
